@@ -1,7 +1,27 @@
+import PropTypes from "prop-types"; 
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/loginService';
+
+const Notification = ({ message, type }) => {
+  if (message === null) {
+    return null;
+  };
+
+  const className = type === 'success' ? 'success' : 'error'
+
+  return (
+    <div className={className}>
+      {message}
+    </div>
+  )
+};
+
+Notification.propTypes = {
+  message: PropTypes.string,
+  type: PropTypes.oneOf(['success', 'error'])
+};
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -11,6 +31,8 @@ const App = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -27,10 +49,24 @@ const App = () => {
       window.localStorage.setItem('loggedBlogUser', JSON.stringify(user));
       blogService.setToken(user.token);
       setUser(user);
+
+      setSuccessMessage(
+        `Welcome ${user.name}`
+      )
+      setTimeout(() => {
+        setSuccessMessage(null)
+      }, 5000);
+
       setUsername('');
       setPassword('');
     } catch (error) {
-      console.error('Wrong Credentials', error.message);
+      console.error('Wrong Credentials', error.response.data.errors);
+      setErrorMessage(
+        `Wrong username or password`
+      );
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000)
     }
   };
 
@@ -54,13 +90,32 @@ const App = () => {
     try {
       const newObject = { title, author, url };
       const response = await blogService.create(newObject);
-      console.log(response);
+
+      if (response.data) {
+        setSuccessMessage(
+          `A new blog ${title} by ${author} added`
+        );
+        setTimeout(() => {
+          setSuccessMessage(null)
+        }, 5000)
+      } else {
+        setErrorMessage(
+          `An Error Occured when creating ${title} blog`
+        )
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000)
+      }
   
       setTitle('');
       setAuthor('');
       setUrl('');
     } catch (error) {
-      console.error("Error creating new blog", error.message);
+      console.error("Error creating new blog", error.response.data.errors);
+      setErrorMessage(error.response.data.errors);
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
     }
   }
 
@@ -110,7 +165,8 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      
+      <Notification message={successMessage} type='success' />
+      <Notification message={errorMessage} type='error' />
       { user === null ? loginForm() : 
         <div>
           <p>{user.name} logged-in</p>
