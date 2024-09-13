@@ -21,6 +21,7 @@ const App = () => {
     try {
       const user = await loginService.login({ username, password });
 
+      window.localStorage.setItem('loggedBlogUser', JSON.stringify(user));
       setUser(user);
       setUsername('');
       setPassword('');
@@ -29,6 +30,11 @@ const App = () => {
     }
     
   };
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedBlogUser');
+    window.location.reload(); // Reload the browser
+  }
 
   const loginForm = () => (
     <>
@@ -56,7 +62,7 @@ const App = () => {
       { user === null ? loginForm() : 
         <div>
           <p>{user.name} logged-in</p>
-          <button type="submit">logout</button>
+          <button type="submit" onClick={handleLogout}>logout</button>
         </div> 
       }
       {blogs.map(blog =>
