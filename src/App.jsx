@@ -31,8 +31,8 @@ const App = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [notificationMessage, setNotificationMessage] = useState(null);
+  const [notificationType, setNotificationType] = useState(null);
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -50,22 +50,26 @@ const App = () => {
       blogService.setToken(user.token);
       setUser(user);
 
-      setSuccessMessage(
+      setNotificationMessage(
         `Welcome ${user.name}`
-      )
+      );
+      setNotificationType('success');
       setTimeout(() => {
-        setSuccessMessage(null)
+        setNotificationMessage(null);
+        setNotificationType(null);
       }, 5000);
 
       setUsername('');
       setPassword('');
     } catch (error) {
-      console.error('Wrong Credentials', error.response.data.errors);
-      setErrorMessage(
-        `Wrong username or password`
-      );
+      console.error('Wrong Credentials', error.message);
+      // Extract the error message from the server's response
+      const errorMessage = error.response?.data?.error ?? 'Wong username or password';
+      setNotificationMessage(errorMessage);
+      setNotificationType('error');
       setTimeout(() => {
-        setErrorMessage(null);
+        setNotificationMessage(null);
+        setNotificationType(null);
       }, 5000)
     }
   };
@@ -90,31 +94,27 @@ const App = () => {
     try {
       const newObject = { title, author, url };
       const response = await blogService.create(newObject);
+      setBlogs([...blogs, response])
 
-      if (response.data) {
-        setSuccessMessage(
-          `A new blog ${title} by ${author} added`
-        );
-        setTimeout(() => {
-          setSuccessMessage(null)
-        }, 5000)
-      } else {
-        setErrorMessage(
-          `An Error Occured when creating ${title} blog`
-        )
-        setTimeout(() => {
-          setErrorMessage(null);
-        }, 5000)
-      }
+      setNotificationMessage(
+        `A new blog ${title} by ${author} added`
+      );
+      setNotificationType('success');
+      setTimeout(() => {
+        setNotificationMessage(null);
+        setNotificationType(null);
+      }, 5000);
   
       setTitle('');
       setAuthor('');
       setUrl('');
     } catch (error) {
-      console.error("Error creating new blog", error.response.data.errors);
-      setErrorMessage(error.response.data.errors);
+      console.error("Error creating new blog", error.message);
+      setNotificationMessage(`An error occurred when creating "${title}" blog`);
+      setNotificationType('error');
       setTimeout(() => {
-        setErrorMessage(null);
+        setNotificationMessage(null);
+        setNotificationType(null);
       }, 5000);
     }
   }
@@ -165,8 +165,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification message={successMessage} type='success' />
-      <Notification message={errorMessage} type='error' />
+      <Notification message={notificationMessage} type={notificationType} />
       { user === null ? loginForm() : 
         <div>
           <p>{user.name} logged-in</p>
