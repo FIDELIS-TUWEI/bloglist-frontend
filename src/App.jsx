@@ -1,5 +1,5 @@
 import PropTypes from "prop-types"; 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/loginService';
@@ -34,6 +34,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [notificationMessage, setNotificationMessage] = useState(null);
   const [notificationType, setNotificationType] = useState(null);
+  const blogRef = useRef();
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -90,6 +91,7 @@ const App = () => {
   };
 
   const addBlog = async (blogObject) => {
+    blogRef.current.toggleVisibility();
     await blogService.create(blogObject)
       .then(returnedBlog => {
         setBlogs(blogs.concat(returnedBlog))
@@ -111,7 +113,7 @@ const App = () => {
   };
 
   const blogForm = () => (
-    <Toggleable buttonLabel="New Blog">
+    <Toggleable buttonLabel="New Blog" ref={blogRef}>
       <BlogForm createBlog={addBlog} />
     </Toggleable>
   )
@@ -135,4 +137,4 @@ const App = () => {
   )
 }
 
-export default App
+export default App;
