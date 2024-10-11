@@ -5,8 +5,9 @@ import blogService from './services/blogs'
 import loginService from './services/loginService';
 import LoginForm from "./components/LoginForm";
 import Toggleable from "./components/Toggleable";
+import BlogForm from "./components/BlogForm";
 
-const Notification = ({ message, type }) => {
+export const Notification = ({ message, type }) => {
   if (message === null) {
     return null;
   };
@@ -25,11 +26,9 @@ Notification.propTypes = {
   type: PropTypes.oneOf(['success', 'error'])
 };
 
+
 const App = () => {
   const [blogs, setBlogs] = useState([]);
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [url, setUrl] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
@@ -90,35 +89,11 @@ const App = () => {
     window.location.reload(); // Reload the browser
   };
 
-  const handleBlogSubmit = async (event) => {
-    event.preventDefault();
-
-    try {
-      const newObject = { title, author, url };
-      const response = await blogService.create(newObject);
-      setBlogs([...blogs, response])
-
-      setNotificationMessage(
-        `A new blog ${title} by ${author} added`
-      );
-      setNotificationType('success');
-      setTimeout(() => {
-        setNotificationMessage(null);
-        setNotificationType(null);
-      }, 5000);
-  
-      setTitle('');
-      setAuthor('');
-      setUrl('');
-    } catch (error) {
-      console.error("Error creating new blog", error.message);
-      setNotificationMessage(`An error occurred when creating "${title}" blog`);
-      setNotificationType('error');
-      setTimeout(() => {
-        setNotificationMessage(null);
-        setNotificationType(null);
-      }, 5000);
-    }
+  const addBlog = async (blogObject) => {
+    await blogService.create(blogObject)
+      .then(returnedBlog => {
+        setBlogs(blogs.concat(returnedBlog))
+      })
   }
 
   const loginForm = () => {
@@ -136,27 +111,9 @@ const App = () => {
   };
 
   const blogForm = () => (
-    <>
-      <h2>Create New Blog</h2>
-      <form onSubmit={handleBlogSubmit}>
-        <div>
-          <label htmlFor="title">Title</label>
-          <input type="text" name="title" id='title' value={title} onChange={({ target }) => setTitle(target.value)} placeholder='title' />
-        </div>
-
-        <div>
-          <label htmlFor="author">Author</label>
-          <input type="text" name="author" id="author" value={author} onChange={({ target }) => setAuthor(target.value)} placeholder='author' />
-        </div>
-
-        <div>
-          <label htmlFor="url">Url</label>
-          <input type="text" name="url" id="url" value={url} onChange={({ target }) => setUrl(target.value)} placeholder='url' />
-        </div>
-
-        <button type="submit">create</button>
-      </form>
-    </>
+    <Toggleable buttonLabel="New Blog">
+      <BlogForm createBlog={addBlog} />
+    </Toggleable>
   )
 
   return (
