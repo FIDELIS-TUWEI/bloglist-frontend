@@ -21,4 +21,9 @@ const getAll = () => {
   return request.then(response => response.data)
 }
 
-export default { getAll, create, setToken }
+const getById = (id) => {
+  const response = axios.get(`${baseUrl}/${id}`);
+  return response.data;
+}
+
+export default { getAll, create, setToken, getById }
