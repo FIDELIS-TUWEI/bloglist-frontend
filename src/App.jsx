@@ -4,6 +4,7 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/loginService';
 import LoginForm from "./components/LoginForm";
+import Toggleable from "./components/Toggleable";
 
 const Notification = ({ message, type }) => {
   if (message === null) {
@@ -34,7 +35,6 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [notificationMessage, setNotificationMessage] = useState(null);
   const [notificationType, setNotificationType] = useState(null);
-  const [loginVisible, setLoginVisible] = useState(false);
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -122,25 +122,16 @@ const App = () => {
   }
 
   const loginForm = () => {
-    const hideWhenVisible = { display: loginVisible ? 'none' : '' };
-    const showWhenVisible = { display: loginVisible ? '': 'none' };
-
     return(
-      <div>
-        <div style={hideWhenVisible}>
-          <button onClick={() => setLoginVisible(true)}>Login</button>
-        </div>
-        <div style={showWhenVisible}>
-          <LoginForm 
-            username={username}
-            password={password}
-            handleUsernameChange={({ target }) => setUsername(target.value)}
-            handlePasswordChange={({ target }) => setPassword(target.value)}
-            handleSubmit={handleLogin}
-          />
-          <button onClick={() => setLoginVisible(false)}>Cancel</button>
-        </div>
-      </div>
+      <Toggleable buttonLabel='Login'>
+        <LoginForm 
+          username={username}
+          password={password}
+          handleUsernameChange={({ target }) => setUsername(target.value)}
+          handlePasswordChange={({ target }) => setPassword(target.value)}
+          handleSubmit={handleLogin}
+        />
+      </Toggleable>
     )
   };
 
