@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/loginService';
+import LoginForm from "./components/LoginForm";
 
 const Notification = ({ message, type }) => {
   if (message === null) {
@@ -33,6 +34,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [notificationMessage, setNotificationMessage] = useState(null);
   const [notificationType, setNotificationType] = useState(null);
+  const [loginVisible, setLoginVisible] = useState(false);
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -119,24 +121,28 @@ const App = () => {
     }
   }
 
-  const loginForm = () => (
-    <>
-      <h3>Login</h3>
-      <form onSubmit={handleLogin}>
-          <div>
-            <label htmlFor="username">Username</label>
-            <input id='username' type="text" name='username' placeholder='username' value={username} onChange={({ target }) => setUsername(target.value)} />
-          </div>
+  const loginForm = () => {
+    const hideWhenVisible = { display: loginVisible ? 'none' : '' };
+    const showWhenVisible = { display: loginVisible ? '': 'none' };
 
-          <div>
-            <label htmlFor="password">Password</label>
-            <input id='password' type="password" name="password" placeholder='password' value={password} onChange={({ target }) => setPassword(target.value)} />
-          </div>
-
-          <button type="submit">login</button>
-        </form>
-      </>
-  );
+    return(
+      <div>
+        <div style={hideWhenVisible}>
+          <button onClick={() => setLoginVisible(true)}>Login</button>
+        </div>
+        <div style={showWhenVisible}>
+          <LoginForm 
+            username={username}
+            password={password}
+            handleUsernameChange={({ target }) => setUsername(target.value)}
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            handleSubmit={handleLogin}
+          />
+          <button onClick={() => setLoginVisible(false)}>Cancel</button>
+        </div>
+      </div>
+    )
+  };
 
   const blogForm = () => (
     <>
