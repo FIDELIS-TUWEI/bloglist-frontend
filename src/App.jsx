@@ -44,7 +44,11 @@ const App = () => {
 
   const updateBlog = (updatedBlog) => {
     setBlogs(blogs.map(blog => (blog.id || blog._id) === (updatedBlog.id || updatedBlog._id) ? updatedBlog : blog));
-  }
+  };
+
+  const removeBlog = (id) => {
+    setBlogs(blogs.filter(blog => blog.id !== id && blog._id !== id));
+  };
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -137,7 +141,7 @@ const App = () => {
       }
 
       {sortedBlogs.map(blog =>
-        <Blog key={blog.id || blog._id} blog={blog} updateBlog={updateBlog} />
+        <Blog key={blog.id || blog._id} blog={blog} updateBlog={updateBlog} removeBlog={removeBlog} />
       )}
     </div>
   )
