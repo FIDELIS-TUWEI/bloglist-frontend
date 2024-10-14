@@ -39,8 +39,12 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    );
   }, []);
+
+  const updateBlog = (updatedBlog) => {
+    setBlogs(blogs.map(blog => (blog.id || blog._id) === (updatedBlog.id || updatedBlog._id) ? updatedBlog : blog));
+  }
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -131,7 +135,7 @@ const App = () => {
       }
 
       {blogs.map(blog =>
-        <Blog key={blog.title} blog={blog} />
+        <Blog key={blog.id || blog._id} blog={blog} updateBlog={updateBlog} />
       )}
     </div>
   )

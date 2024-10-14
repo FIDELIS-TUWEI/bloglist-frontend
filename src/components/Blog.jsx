@@ -1,11 +1,27 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
+import blogService from '../services/blogs';
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, updateBlog }) => {
   const [visible, setVisible] = useState(false);
 
   const toggleVisibility = () => {
     setVisible(!visible);
+  };
+
+  const handleLike = async () => {
+    const updatedBlogObject  = {
+      ...blog,
+      likes: blog.likes + 1,
+      user: blog.user.id || blog.user
+    };
+
+    try {
+      const returnedBlog = await blogService.update(blog.id || blog._id, updatedBlogObject);
+      updateBlog(returnedBlog);
+    } catch (error) {
+      console.error("Failed to update likes:", error.message);
+    }
   };
 
   const blogStyle = {
@@ -28,7 +44,7 @@ const Blog = ({ blog }) => {
           <p>Title: {blog.title}</p>
           <p>Url: {blog.url}</p>
           <p>Likes: {blog.likes}
-            <button>like</button>
+            <button onClick={handleLike}>like</button>
           </p>
           <p>Author: {blog.author}</p>
         </div>
@@ -38,7 +54,8 @@ const Blog = ({ blog }) => {
 };
 
 Blog.propTypes = {
-  blog: PropTypes.object.isRequired
+  blog: PropTypes.object.isRequired,
+  updateBlog: PropTypes.func.isRequired
 }
 
 export default Blog
