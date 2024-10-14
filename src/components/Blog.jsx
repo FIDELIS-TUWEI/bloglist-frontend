@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 import blogService from '../services/blogs';
 
-const Blog = ({ blog, updateBlog }) => {
+const Blog = ({ blog, updateBlog, removeBlog }) => {
   const [visible, setVisible] = useState(false);
 
   const toggleVisibility = () => {
@@ -23,6 +23,19 @@ const Blog = ({ blog, updateBlog }) => {
       console.error("Failed to update likes:", error.message);
     }
   };
+
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm(`Delete blog: ${blog.title} by ${blog.author}? This action can't be undone.`);
+
+    if (confirmDelete) {
+      try {
+        await blogService.remove(blog.id || blog._id);
+        removeBlog(blog.id || blog._id);
+      } catch (error) {
+        console.error("Failed to delete blog:", error.message);
+      }
+    }
+  }
 
   const blogStyle = {
     paddingTop: 10,
@@ -47,6 +60,7 @@ const Blog = ({ blog, updateBlog }) => {
             <button onClick={handleLike}>like</button>
           </p>
           <p>Author: {blog.author}</p>
+          <button onClick={handleDelete}>remove</button>
         </div>
       )}
     </div>  
@@ -55,7 +69,8 @@ const Blog = ({ blog, updateBlog }) => {
 
 Blog.propTypes = {
   blog: PropTypes.object.isRequired,
-  updateBlog: PropTypes.func.isRequired
+  updateBlog: PropTypes.func.isRequired,
+  removeBlog: PropTypes.func.isRequired
 }
 
 export default Blog
